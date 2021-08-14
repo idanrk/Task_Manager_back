@@ -1,13 +1,14 @@
 const express = require("express")
 const UserModel = require("../models/user")
-
+const auth_middleware = require('../middleware/auth')
+const auth = require("../middleware/auth")
 const router = new express.Router()
 
-
-router.get('/users/login', async(req, res) => {
+router.post('/users/login', async(req, res) => {
     try {
         const user = await UserModel.findByCredentials(req.body.email, req.body.password)
-        res.send(user)
+        const token = await user.generateAuthToken()
+        res.send({ user, token })
     } catch (error) {
         res.status(400).send()
     }
@@ -17,38 +18,47 @@ router.get('/users/login', async(req, res) => {
 router.post('/users', async(req, res) => { //create user
     const user = new UserModel(req.body)
     try {
-        await user.save()
-        res.status(201).send(user)
+        const token = await user.generateAuthToken()
+        res.status(201).send({ user, token })
     } catch (error) {
         res.status(400).send(error)
     }
 })
-router.get('/users', async(req, res) => { //get users
+router.post('/users/logout', auth_middleware, async(req, res) => {
+
     try {
-        const users = await UserModel.find({})
-        res.send(users)
-    } catch (error) {
-        res.status(500).send(error)
-    }
+        const user = req.user
+        const _token = req.token
+        user.tokens = user.tokens.filter((token) => {
+            return (token.token !== _token)
+        })
+        await user.save()
+        res.send()
+    } catch (error) { res.status(500).send(error) }
 })
-router.get('/users/:id', async(req, res) => { //get specific user
-    if (req.params.id.length != 24) { return res.status(400).send("user id must be 24 characters") }
+router.post('/users/logoutAll', auth_middleware, async(req, res) => {
+
     try {
-        const user = await UserModel.findById(req.params.id)
-        if (!user)
-            return res.status(404).send("User not found.")
+        const user = req.user
+        user.tokens = []
+        await user.save()
+        res.send()
+    } catch (error) { res.status(500).send(error) }
+})
+
+router.get('/users/profile', auth_middleware, async(req, res) => { //get users
+    try {
+        const user = req.user
         res.send(user)
     } catch (error) {
         res.status(500).send(error)
     }
 })
 
-router.patch('/users/:id', async(req, res) => { //update specific user
-    if (req.params.id.length != 24)
-        return res.status(400).send("id must be 24 characters")
+
+router.patch('/users/me', auth_middleware, async(req, res) => { //update specific user
     if (!req.body)
         return res.status(400).send(new Error("No updates provided."))
-
 
     const updates = Object.keys(req.body)
     const allowedUpdates = ["name", "age", "password", "email"] // other than that will raise an error 400.
@@ -58,10 +68,7 @@ router.patch('/users/:id', async(req, res) => { //update specific user
              Allowed arguments: ${allowedUpdates}`)
 
     try {
-        console.log("hit")
-        const user = await UserModel.findById(req.params.id)
-        if (!user)
-            return res.status(404).send("User not found")
+        const user = req.user
         updates.forEach((update) => user[update] = req.body[update])
         await user.save()
         res.send(user)
@@ -71,15 +78,10 @@ router.patch('/users/:id', async(req, res) => { //update specific user
     }
 })
 
-router.delete('/users/:id', async(req, res) => { //delete specific user
-    if (req.params.id.length != 24)
-        return res.status(400).send("id must be 24 characters")
-
+router.delete('/users/me', auth_middleware, async(req, res) => { //delete specific user
     try {
-        const user = await UserModel.findByIdAndDelete(req.params.id)
-        if (!user)
-            return res.status(404).send("User not found")
-        res.send("Deleted the user:\n" + user)
+        await req.user.remove()
+        res.send("Deleted the user:\n" + req.user)
     } catch (error) {
         res.status(400).send(error)
     }
