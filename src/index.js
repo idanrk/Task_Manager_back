@@ -10,5 +10,4 @@ app.use(express.json())
 app.use(UserRouter)
 app.use(TaskRouter)
 
-
 app.listen(port, () => { console.log('Listening on: ' + port) })

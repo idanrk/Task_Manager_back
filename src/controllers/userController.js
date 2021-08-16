@@ -1,56 +1,20 @@
 const UserModel = require("../models/user")
 const sharp = require('sharp')
+const { welcomeEmail, deletionMail } = require('../emails/emails')
 
 
-
-exports.loginUser = async(req, res) => {
-    try {
-        const user = await UserModel.findByCredentials(req.body.email, req.body.password)
-        const token = await user.generateAuthToken()
-        res.send({ user, token })
-    } catch (error) {
-        res.status(400).send()
-    }
-}
 
 exports.createUser = async(req, res) => {
     const user = new UserModel(req.body)
     try {
         const token = await user.generateAuthToken()
+        welcomeEmail(user.email, user.name)
         res.status(201).send({ user, token })
     } catch (error) {
         res.status(400).send(error)
     }
 }
 
-exports.logoutUser = async(req, res) => {
-    try {
-        const user = req.user
-        const _token = req.token
-        user.tokens = user.tokens.filter(token => (token.token !== _token))
-        await user.save()
-        res.send()
-    } catch (error) { res.status(500).send(error) }
-}
-
-exports.logoutAllSesions = async(req, res) => {
-
-    try {
-        const user = req.user
-        user.tokens = []
-        await user.save()
-        res.send()
-    } catch (error) { res.status(500).send(error) }
-}
-
-exports.userProfile = async(req, res) => {
-    try {
-        const user = req.user
-        res.send(user)
-    } catch (error) {
-        res.status(500).send(error)
-    }
-}
 
 exports.updateUser = async(req, res) => {
     if (!req.body)
@@ -77,6 +41,7 @@ exports.updateUser = async(req, res) => {
 exports.deleteUser = async(req, res) => { //delete specific user
     try {
         const user = req.user
+        deletionMail(user.email, user.name)
         await user.remove()
         res.send("Deleted the user:\n" + user)
     } catch (error) {
@@ -85,9 +50,51 @@ exports.deleteUser = async(req, res) => { //delete specific user
 
 }
 
+
+
+exports.loginUser = async(req, res) => {
+    try {
+        const user = await UserModel.findByCredentials(req.body.email, req.body.password)
+        const token = await user.generateAuthToken()
+        res.send({ user, token })
+    } catch (error) {
+        res.status(400).send(error.message)
+    }
+}
+
+
+exports.userProfile = async(req, res) => {
+    try {
+        const user = req.user
+        res.send(user)
+    } catch (error) {
+        res.status(500).send(error)
+    }
+}
+
+
+exports.logoutUser = async(req, res) => {
+    try {
+        const user = req.user
+        const _token = req.token
+        user.tokens = user.tokens.filter(token => (token.token !== _token))
+        await user.save()
+        res.send()
+    } catch (error) { res.status(500).send(error) }
+}
+
+exports.logoutAllSesions = async(req, res) => {
+
+    try {
+        const user = req.user
+        user.tokens = []
+        await user.save()
+        res.send()
+    } catch (error) { res.status(500).send(error) }
+}
+
+
 // Avatar Picture
-
-
 // Upload profile pic
 exports.uploadAvatar = async(req, res) => {
     const user = req.user
@@ -101,7 +108,6 @@ exports.uploadAvatar = async(req, res) => {
 }
 
 // Get profile pic
-
 exports.getAvatar = async(req, res) => {
     const user = req.user
     try {
