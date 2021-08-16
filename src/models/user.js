@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const TaskModel = require('../models/task')
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -34,11 +35,20 @@ const userSchema = new mongoose.Schema({
             type: String,
             required: true
         }
-    }]
+    }],
+    avatar: {
+        type: Buffer,
+    }
 
+}, { timestamps: true })
+
+userSchema.virtual('tasks', { //referencing tasks schema
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'owner'
 })
 
-userSchema.methods.toJSON = function() {
+userSchema.methods.toJSON = function() { //not providing sensetive info
     const user = this
     const userObject = user.toObject()
     delete userObject.password
@@ -67,10 +77,16 @@ userSchema.statics.findByCredentials = async function(email, password) {
 
 }
 
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function(next) { //pre-save middleware
     const user = this
     if (user.isModified('password'))
         user.password = await bcrypt.hash(user.password, 8)
+    next()
+})
+
+userSchema.pre('remove', async function(next) { //pre-remove middleware -> cascade remove tasks
+    const user = this
+    await TaskModel.deleteMany({ owner: user._id })
     next()
 })
 
