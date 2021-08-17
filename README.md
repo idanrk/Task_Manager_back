@@ -1,7 +1,7 @@
 # Task Manager Backend Side - Node.js Project
 
-*  Backend For Task Manager REST API. Working with Databases, authentications with tokens, sending emails and more.
-*  The task manager lets you fully manage your user account, uploading an avatar profile picture and auto sending welcome/goodbye emails.
+*  The task manager is built over MongoDB, allowing the user to register, log in, update, and upload an avatar profile picture. The user can manage his TODO tasks, filter searches, and scroll through pages.
+*  The CRUD methods are secured with tokens and provided with nice emails to the user's account.
 *  Modules used: express,mongodb,mongoose,validators,bcrypt.js,multer,nodemon and more.
 *  You can run the code on your local machine using: `npm run dev`
 *  Make sure to add ENV Variables:
