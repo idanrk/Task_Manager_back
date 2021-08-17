@@ -1,6 +1,6 @@
-# Task Manager BackEnd side - Node.js Project
+# Task Manager Backend Side - Node.js Project
 
-*  BackEnd For Tasks Managar REST API. Working with Databases, authentications with tokens, sending emails and more.
+*  Backend For Task Manager REST API. Working with Databases, authentications with tokens, sending emails and more.
 *  The task manager lets you fully manage your user account, uploading an avatar profile picture and auto sending welcome/goodbye emails.
 *  Modules used: express,mongodb,mongoose,validators,bcrypt.js,multer,nodemon and more.
 *  You can run the code on your local machine using: `npm run dev`
