@@ -10,3 +10,4 @@
 *   `MAILGUN_API_KEY=_` , Also get an API Key from MailGun.
 *   `MAILGUN_DOMAIN=_`
 *   `JWT_SECRET=_`
+# The documentation can be found on: https://documenter.getpostman.com/view/16998201/Tzz8tdXM
