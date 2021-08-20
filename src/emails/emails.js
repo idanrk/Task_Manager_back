@@ -14,9 +14,8 @@ exports.welcomeEmail = async(email, name) => {
             subject: 'Task Manager - Welcome to Task Manager!',
             text: `Hi ${name}, Thank you for joining us!.`
         })
-        console.log(msg)
     } catch (error) {
-        res.status(500).send(error.message)
+        res.status(500).send(error)
     }
 }
 
@@ -29,6 +28,6 @@ exports.deletionMail = async(email, name) => {
             text: `Hi ${name}, Sorry to see you leave... would you mind send us an email back why you decided to leave?`
         })
     } catch (error) {
-        res.status(500).send(error.message)
+        res.status(500).send(error)
     }
 }

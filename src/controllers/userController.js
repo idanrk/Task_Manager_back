@@ -43,7 +43,7 @@ exports.deleteUser = async(req, res) => { //delete specific user
         const user = req.user
         deletionMail(user.email, user.name)
         await user.remove()
-        res.send("Deleted the user:\n" + user)
+        res.send(user)
     } catch (error) {
         res.status(400).send(error)
     }
@@ -63,7 +63,7 @@ exports.loginUser = async(req, res) => {
 }
 
 
-exports.userProfile = async(req, res) => {
+exports.userProfile = (req, res) => {
     try {
         const user = req.user
         res.send(user)

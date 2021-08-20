@@ -4,7 +4,7 @@ exports.createTask = async(req, res) => { //create task
     const task = new TaskModel({...req.body, owner: req.user._id })
     try {
         await task.save()
-        res.status("201").send(task)
+        res.status(201).send(task)
     } catch (error) {
         res.status(400).send("Could not create new task, error:\n" + error)
     }
@@ -86,7 +86,7 @@ exports.deleteTask = async(req, res) => { //delete specific task
     try {
         const task = await TaskModel.findOneAndDelete({ _id: req.params.id, owner: req.user._id })
         if (!task)
-            return res.status(404).send("Task not found")
+            return res.status(400).send()
         res.send("Deleted the task:\n" + task)
     } catch (error) {
         res.status(400).send(error)
